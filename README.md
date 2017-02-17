@@ -1,5 +1,8 @@
 # react-native-city-pick
 
+
+## A component for pick cities in china with React Native
+
 #### 采用picker选择，兼容android , ios
 
 #### 下载组件
