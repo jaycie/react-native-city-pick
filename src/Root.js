@@ -19,7 +19,10 @@ export default class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      visible: false
+      visible: false,
+      selectedProvince: '',
+      selectedCity: '',
+      selectedArea: ''
     };
   }
 
@@ -29,18 +32,35 @@ export default class Root extends Component {
         <TouchableOpacity onPress={this.chooseRegion.bind(this)}>
             <Text style={styles.welcome}>请选择城市</Text>
         </TouchableOpacity>
+        <Text>已选择： {this.state.selectedProvince} {this.state.selectedCity} {this.state.selectedArea}</Text>
 
-        <Region visible={this.state.visible} />
+        <Region visible={this.state.visible} setChoosed={this.setChoosed.bind(this)} cancled={this.cancled.bind(this)} />
       </View>
     );
   }
 
   chooseRegion() {
-    console.log('start');
     this.setState({
       visible: true
     })
   }
+
+  cancled() {
+    this.setState({
+      visible: false
+    });
+    console.log(this.state.visible);
+  }
+
+  setChoosed(p, c, a) {
+    this.setState({
+      selectedProvince: p,
+      selectedCity: c,
+      selectedArea: a,
+      visible: false
+    });
+  }
+
 }
 
 const styles = StyleSheet.create({

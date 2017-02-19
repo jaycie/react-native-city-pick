@@ -17,13 +17,11 @@ import {
 import Webapi from './webapi';
 
 const {width, height} = Dimensions.get('window');
-let noop = () => {};
 let _Data = [];
 
 export default class Region extends Component {
   constructor(props, context) {
       super(props, context);
-      _Data = [];
       this.state = {
         //距离顶部的距离
         topValue: new Animated.Value(0),
@@ -34,28 +32,12 @@ export default class Region extends Component {
         //地区
         area: [],
         //选中的省
-        selectedProvince: this.props.selectedProvince,
+        selectedProvince: this.props.selectedProvince || '330000',  //首次打开默认的值,参见：https://static.yjsvip.com/static/js/city_data_1.0.js
         //选中的市
-        selectedCity: this.props.selectedCity,
+        selectedCity: this.props.selectedCity || '330100',
         //选中的地区
-        selectedArea: this.props.selectedArea
+        selectedArea: this.props.selectedArea || '330110'
       }
-  }
-
-  static defaultProps = {  
-      //默认不显示
-      visible: false,
-      //默认显示北京(省)
-      selectedProvince: '110000',
-      //默认显示北京(市)
-      selectedCity: '110100',
-      //默认显示(区)
-      selectedArea: '110101',
-      //确定
-      onSubmit: noop,
-      //取消
-      onCancel: noop
-    
   }
 
 
@@ -77,46 +59,6 @@ export default class Region extends Component {
   componentWillMount() {
     //开始动画
     this.startAnimate();
-  }
-
-
-  componentDidMount() {
-    Webapi
-      .fetchRegionData()
-      .then((data) => {
-        //cache it.
-        _Data = data;
-
-        //过滤省
-        var province = this._filter('086');
-        this._selectedProvinceName = _Data[this.state.selectedProvince][0];
-
-        //过滤省对于的市
-        var city = this._filter(this.state.selectedProvince);
-
-        //市的名字
-        this._selectedCityName = '';
-        if (this.state.selectedCity) {
-          this._selectedCityName = _Data[this.state.selectedCity][0];
-        }
-
-        //过滤第一个市对应的区
-        var area = [];
-        if (this.state.selectedCity) {
-          area = this._filter(this.state.selectedCity);
-
-          this._selectAreaName = '';
-          if (this.state.selectedArea) {
-            this._selectAreaName = _Data[this.state.selectedArea][0];
-          }
-        }
-
-        this.setState({
-          province: province,
-          city: city,
-          area: area
-        });
-      });
   }
 
 
@@ -178,6 +120,46 @@ export default class Region extends Component {
     );
   }
 
+
+  componentDidMount() {
+    Webapi
+      .fetchRegionData()
+      .then((data) => {
+        //cache it.
+        _Data = data;
+
+        //过滤省
+        var province = this._filter('086');
+        this._selectedProvinceName = _Data[this.state.selectedProvince][0];
+
+        //过滤省对于的市
+        var city = this._filter(this.state.selectedProvince);
+
+        //市的名字
+        this._selectedCityName = '';
+        if (this.state.selectedCity) {
+          this._selectedCityName = _Data[this.state.selectedCity][0];
+        }
+
+        //过滤第一个市对应的区
+        var area = [];
+        if (this.state.selectedCity) {
+          area = this._filter(this.state.selectedCity);
+
+          this._selectAreaName = '';
+          if (this.state.selectedArea) {
+            this._selectAreaName = _Data[this.state.selectedArea][0];
+          }
+        }
+
+        this.setState({
+          province: province,
+          city: city,
+          area: area
+        });
+      });
+  }
+
   /**
    * 执行动画
    */
@@ -187,6 +169,17 @@ export default class Region extends Component {
       friction: 10,
       tension: 30
     }).start();
+  }
+
+   /**
+   * 隐藏动画
+   */
+  stopAnimate() {
+    Animated.spring(this.state.topValue, {
+      toValue: 0,
+      friction: 10,
+      tension: 30
+    }).start(this.props.cancled());
   }
 
 
@@ -284,7 +277,7 @@ export default class Region extends Component {
    * 处理取消
    */
   _handleCancel() {
-    this.props.onCancel()
+    this.stopAnimate();
   }
 
 
@@ -292,16 +285,8 @@ export default class Region extends Component {
    * 处理确定
    */
   _handleSubmit() {
-    this.props.onSubmit({
-      province: this.state.selectedProvince,
-      city: this.state.selectedCity,
-      area: this.state.selectedArea,
-      provinceName: this._selectedProvinceName,
-      cityName: this._selectedCityName,
-      areaName: this._selectAreaName
-    })
-    console.log(this.state);
-    alert(this._selectedProvinceName+this._selectedCityName+this._selectAreaName);
+    this.stopAnimate();
+    this.props.setChoosed(this._selectedProvinceName, this._selectedCityName, this._selectAreaName);
   }
 
 
@@ -333,28 +318,28 @@ var styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   nav: {
-    height: 60,
-    padding: 20,
+    height: 40,
+    padding: 10,
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'blue',
+    backgroundColor: '#ffeaea',
     flexDirection: 'row'
   },
   text: {
-    color: '#FFF',
-    fontSize: 20,
+    color: '#e61d4c',
+    fontSize: 15,
     fontWeight: 'bold'
   },
   region: {
     flex: 1,
-    marginTop: height/2,
+    marginTop: 3*height/5,
     backgroundColor: '#FFF'
   },
   regionArea: {
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   regionItem: {
-    flex: 1
+    flex: 1,
   }
 });
 
