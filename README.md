@@ -21,4 +21,4 @@ $ react-native run-ios
 ```
 
 #### 效果
-![](http://images2015.cnblogs.com/blog/381372/201702/381372-20170217104247816-189323305.png)
+![](https://github.com/jaycie/react-native-city-pick/blob/master/src/screenshot/screenshot.png)
